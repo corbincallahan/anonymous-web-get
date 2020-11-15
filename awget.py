@@ -39,7 +39,7 @@ for ss in ssChain:
     print("<%s, %s>" % (ss[0], ss[1]))
 
 if (numSS >= 2):
-    choice = random.randrange(numSS - 1)
+    choice = random.randrange(numSS)
 else:
     choice = 0
 ssAddr = ssChain[choice]
