@@ -5,20 +5,24 @@ class ClientThread(threading.Thread):
         threading.Thread.__init__(self)
         self.csock = socket
     def run(self):
-        url = self.csock.recv(2048).decode()
-        print("Request: %s" % url)
-        numSS = self.csock.recv(2048)
-        numSS = socket.ntohs(numSS)
-        ssChain = []
-        ssGotten = 0
-        while (ssGotten < numSS):
-            ss = self.csock.recv(2048)
-            ss = ss.decode()
-            ssChain.append(ss)
+        buff = ""
+        bytesRecvd = 0
+        msgLen = sys.maxsize
+        chunk = self.csock.recv(4096).decode()
+        if "::" not in chunk:
+            print("Error receiving message, exiting")
+            sys.exit(1)
+        msgLen = int(chunk[:chunk.find("::")])
+        buff = chunk[chunk.find("::") + 2:]
+        bytesRecvd += len(buff)
+        while (bytesRecvd < msgLen):
+            chunk = self.csock.recv(min(4096, msgLen - bytesRecvd)).decode()
+            buff += chunk
+            bytesRecvd += len(chunk)
+        print(msgLen, buff)
         
-
 PORT = 54321
-HOST = "0.0.0.0"
+HOST = "127.0.0.1"
 hostName = socket.gethostname()
 
 if (len(sys.argv) == 3):

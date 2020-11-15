@@ -27,7 +27,7 @@ try:
             if (len(info) != 2):
                 raise Exception("")
             ssAddr = info[0]
-            ssPort = info[1]
+            ssPort = int(info[1])
             ssChain.append((ssAddr, ssPort))
 except:
     print("Unable to read in chainfile, exiting")
@@ -38,16 +38,32 @@ print("Chainlist is")
 for ss in ssChain:
     print("<%s, %s>" % (ss[0], ss[1]))
 
-choice = randrange(numSS - 1)
+if (numSS >= 2):
+    choice = random.randrange(numSS - 1)
+else:
+    choice = 0
 ssAddr = ssChain[choice]
-numSS -= 1
-ssChain.pop(choice)
 ssSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print(ssAddr)
 try:
     ssSock.connect(ssAddr)
     numSS -= 1
     ssChain.pop(choice)
-except:
+    msg = ""
+    msg += url
+    msg += str(numSS)
+    msg += str(ssChain)
+    msgLen = len(msg)
+    msg = str(msgLen) + "::" + msg
+    print(msg)
+    msg = msg.encode()
+    totalSent = 0
+    while (totalSent < msgLen):
+        sent = ssSock.send(msg[totalSent:])
+        if sent == 0:
+            raise Exception("")
+        totalSent += sent
+except OSError:
     print("Connection to stepping stone failed, exiting")
     sys.exit(1)
 
