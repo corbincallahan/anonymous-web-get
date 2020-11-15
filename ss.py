@@ -21,6 +21,47 @@ class ClientThread(threading.Thread):
             bytesRecvd += len(chunk)
         print(msgLen, buff)
         
+        msgIn = buff.split("\n")
+        url = msgIn[0]
+        numSS = int(msgIn[1])
+        if(numSS == 0):
+            # GET request using url
+            print("Getting from url")
+        else:
+            # Forward to next SS
+            ssChain = msgIn[2:]
+            
+            if (numSS >= 2):
+                choice = random.randrange(numSS)
+            else:
+                choice = 0
+            ssAddr = ssChain[choice][1:-1].split(", ")
+            ssHost = ssAddr[0][1:-1]
+            ssPort = int(ssAddr[1])
+            numSS -= 1
+            ssChain.pop(choice)
+            ssSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                ssSock.connect((ssHost, ssPort))
+                msg = ""
+                msg += url
+                msg += "\n" + str(numSS)
+                for ss in ssChain:
+                    msg += "\n" + str(ss)
+                msgLen = len(msg)
+                msg = str(msgLen) + "::" + msg
+                msg = msg.encode()
+                totalSent = 0
+                while (totalSent < msgLen):
+                    sent = ssSock.send(msg[totalSent:])
+                    if sent == 0:
+                        raise Exception("")
+                    totalSent += sent
+            except OSError:
+                print("Connection to stepping stone failed, exiting")
+                sys.exit(1)
+        
+        
 PORT = 54321
 HOST = "127.0.0.1"
 hostName = socket.gethostname()
