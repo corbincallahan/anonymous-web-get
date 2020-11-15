@@ -1,19 +1,23 @@
 import socket, sys, random
 
 fileName = "chaingang.txt"
-url = sys.argv[1]
+url = ""
 ssChain = []
 numSS = 0
 
-if (len(sys.argv) == 4):
-    option = sys.argv[2]
-    value = sys.argv[3]
-    if (option == "-c"):
-        fileName = value
+if (len(sys.argv) == 2):
+    url = sys.argv[1]
+elif (len(sys.argv) == 4):
+    if (sys.argv[1] == "-c"):
+        fileName = sys.argv[2]
+        url = sys.argv[3]
+    elif (sys.argv[2] == "-c"):
+        fileName = sys.argv[3]
+        url = sys.argv[1]
     else:
-        print("Invalid chainfile name, exiting")
+        print("Invalid arguments, exiting")
         sys.exit(1)
-elif (len(sys.argv) != 2):
+else:
     print("Invalid arguments, exiting")
     sys.exit(1)
 
