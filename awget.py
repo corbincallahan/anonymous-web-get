@@ -55,8 +55,9 @@ try:
     ssChain.pop(choice)
     msg = ""
     msg += url
-    msg += str(numSS)
-    msg += str(ssChain)
+    msg += "\n" + str(numSS)
+    for ss in ssChain:
+        msg += "\n" + str(ss)
     msgLen = len(msg)
     msg = str(msgLen) + "::" + msg
     print(msg)
