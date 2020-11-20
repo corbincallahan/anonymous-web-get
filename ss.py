@@ -113,6 +113,7 @@ class ClientThread(threading.Thread):
             chunk = f.read(1024)
             while (chunk):
                 self.csock.send(chunk)
+                f.read(1024)
 
     def remove_file(self, file_name):
         if os.path.exists(file_name):
