@@ -73,7 +73,19 @@ except OSError:
     sys.exit(1)
 
 print("Waiting for file...")
+file_name = url.split("/")[-1]
+if "www." in file_name:
+    file_name = "index.html"
+file_size = int(ssSock.recv(1024).decode())
+amount_read = 0
+f = open(file_name, "wb")
+while amount_read < file_size:
+    chunk = ssSock.recv(1024)
+    if not chunk:
+        break
+    f.write(chunk)
+    amount_read += len(chunk)
+    
 
-
-# print("Received file %s" % outFileName)
+print("Received file %s" % file_name)
 

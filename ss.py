@@ -50,7 +50,6 @@ class ClientThread(threading.Thread):
             print("issuing wget for file %s" % url.split('/')[-1])
             download_file(url)
             print("File received")
-            print("Relaying file ...")
         else:
             # Forward to next SS
             ssChain = msgIn[2:]
@@ -89,9 +88,10 @@ class ClientThread(threading.Thread):
                 sys.exit(1)
             print("waiting for file...")
             self.recv_file(file_name, ssSock)
-            print("file received")
+            print("file received") 
+        print("Relaying file ...")
         self.send_file(file_name)
-        self.remove_file(file_name)
+        # self.remove_file(file_name)
 
     def recv_file(self, file_name, ssSock):
         # receive file through ssSock
