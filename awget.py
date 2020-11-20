@@ -38,7 +38,7 @@ except:
     sys.exit(1)
 
 print("Request: %s" % url)
-print("Chainlist is")
+print("chainlist is")
 for ss in ssChain:
     print("<%s, %s>" % (ss[0], ss[1]))
 
@@ -48,7 +48,7 @@ else:
     choice = 0
 ssAddr = ssChain[choice]
 ssSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print(ssAddr)
+print("next SS is <%s, %s>" % (ssAddr[0], ssAddr[1]))
 try:
     ssSock.connect(ssAddr)
     numSS -= 1
@@ -57,10 +57,10 @@ try:
     msg += url
     msg += "\n" + str(numSS)
     for ss in ssChain:
-        msg += "\n" + str(ss)
+        msg += "\n" + ("<%s, %s>" % (ss[0], ss[1]))
     msgLen = len(msg)
     msg = str(msgLen) + "::" + msg
-    print(msg)
+    #print(msg)
     msg = msg.encode()
     totalSent = 0
     while (totalSent < msgLen):
