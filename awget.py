@@ -1,4 +1,5 @@
-import socket, sys, random
+import socket, sys, random, os
+from urllib.parse import urlparse
 
 fileName = "chaingang.txt"
 url = ""
@@ -73,8 +74,9 @@ except OSError:
     sys.exit(1)
 
 print("Waiting for file...")
-file_name = url.split("/")[-1]
-if "www." in file_name:
+a = urlparse(url)
+file_name = os.path.basename(a.path)
+if file_name == '':
     file_name = "index.html"
 file_size = int(ssSock.recv(1024).decode())
 amount_read = 0
