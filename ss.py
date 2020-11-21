@@ -126,7 +126,7 @@ class ClientThread(threading.Thread):
             sys.exit(1)
 
 PORT = 54321
-HOST = "127.0.0.1"
+HOST = "0.0.0.0"
 hostName = socket.gethostname()
 
 if (len(sys.argv) == 3):
