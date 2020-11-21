@@ -1,8 +1,14 @@
-import random, socket, sys, threading, requests
+import random, socket, sys, threading, requests, os
+
+def get_filename(url):
+    filename = url.split('/')[-1]
+    if "www." in filename:
+        filename = "index.html"
+    return filename
 
 # From Roman Podlinov at https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests/16696317#16696317
 def download_file(url):
-    local_filename = url.split('/')[-1]
+    local_filename = get_filename(url)
     # NOTE the stream=True parameter below
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
@@ -33,30 +39,23 @@ class ClientThread(threading.Thread):
             chunk = self.csock.recv(min(4096, msgLen - bytesRecvd)).decode()
             buff += chunk
             bytesRecvd += len(chunk)
-        #print(msgLen, buff)
-        
         msgIn = buff.split("\n")
         url = msgIn[0]
+        file_name = get_filename(url)
         numSS = int(msgIn[1])
-
         print("Request: %s" % url)
-
         if(numSS == 0):
             print("chainlist is empty")
             # GET request using url
             print("issuing wget for file %s" % url.split('/')[-1])
             download_file(url)
             print("File received")
-            print("Relaying file ...")
-
         else:
             # Forward to next SS
             ssChain = msgIn[2:]
-
             print("chainlist is")
             for ss in ssChain:
                 print(ss)
-            
             if (numSS >= 2):
                 choice = random.randrange(numSS)
             else:
@@ -84,13 +83,45 @@ class ClientThread(threading.Thread):
                     if sent == 0:
                         raise Exception("")
                     totalSent += sent
-            except OSError:
+            except:
                 print("Connection to stepping stone failed, exiting")
                 sys.exit(1)
-
             print("waiting for file...")
-        
-        
+            self.recv_file(file_name, ssSock)
+            print("file received") 
+        print("Relaying file ...")
+        self.send_file(file_name)
+        # self.remove_file(file_name)
+
+    def recv_file(self, file_name, ssSock):
+        # receive file through ssSock
+        file_size = int(ssSock.recv(1024).decode())
+        amount_read = 0
+        with open(file_name, "wb") as f:
+            while amount_read < file_size:
+                chunk = ssSock.recv(1024)
+                if not chunk:
+                    break
+                f.write(chunk)
+                amount_read += len(chunk)
+
+    def send_file(self, file_name):
+        # send file through cSock
+        file_size = str(os.path.getsize(file_name)).encode()
+        self.csock.send(file_size)
+        with open(file_name, "rb") as f:
+            chunk = f.read(1024)
+            while (chunk):
+                self.csock.send(chunk)
+                chunk = f.read(1024)
+
+    def remove_file(self, file_name):
+        if os.path.exists(file_name):
+            os.remove(file_name)
+        else:
+            print("File nonexistent and could not be removed, exiting")
+            sys.exit(1)
+
 PORT = 54321
 HOST = "127.0.0.1"
 hostName = socket.gethostname()
