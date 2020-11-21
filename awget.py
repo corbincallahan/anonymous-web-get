@@ -22,6 +22,9 @@ else:
     print("Invalid arguments, exiting")
     sys.exit(1)
 
+if("http" not in url):
+    url = "http://" + url
+
 try:
     with open(fileName, "r") as chainfile:
         numSS = int(chainfile.readline())

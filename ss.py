@@ -36,7 +36,7 @@ class ClientThread(threading.Thread):
         if(numSS == 0):
             print("chainlist is empty")
             # GET request using url
-            print("issuing wget for file %s" % url.split('/')[-1])
+            print("issuing wget for file %s" % get_filename(url))
             self.download_file(url)
             print("File received")
         else:
