@@ -1,8 +1,11 @@
 import random, socket, sys, threading, requests, os
+from urllib.parse import urlparse
 
+# from Ofir Israel at https://stackoverflow.com/a/18727481
 def get_filename(url):
-    filename = url.split('/')[-1]
-    if "www." in filename:
+    a = urlparse(url)
+    filename = os.path.basename(a.path)
+    if filename == '':
         filename = "index.html"
     return filename
 
