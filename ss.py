@@ -6,20 +6,6 @@ def get_filename(url):
         filename = "index.html"
     return filename
 
-# From Roman Podlinov at https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests/16696317#16696317
-def download_file(url):
-    local_filename = get_filename(url)
-    # NOTE the stream=True parameter below
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        with open(local_filename, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=8192): 
-                # If you have chunk encoded response uncomment if
-                # and set chunk_size parameter to None.
-                #if chunk: 
-                f.write(chunk)
-    return local_filename
-
 class ClientThread(threading.Thread):
     def __init__(self, socket):
         threading.Thread.__init__(self)
@@ -41,14 +27,14 @@ class ClientThread(threading.Thread):
             bytesRecvd += len(chunk)
         msgIn = buff.split("\n")
         url = msgIn[0]
-        file_name = get_filename(url)
+        file_name = str(self.csock.getsockname()) + get_filename(url)
         numSS = int(msgIn[1])
         print("Request: %s" % url)
         if(numSS == 0):
             print("chainlist is empty")
             # GET request using url
             print("issuing wget for file %s" % url.split('/')[-1])
-            download_file(url)
+            self.download_file(url)
             print("File received")
         else:
             # Forward to next SS
@@ -91,7 +77,21 @@ class ClientThread(threading.Thread):
             print("file received") 
         print("Relaying file ...")
         self.send_file(file_name)
-        # self.remove_file(file_name)
+        self.remove_file(file_name)
+    
+    # From Roman Podlinov at https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests/16696317#16696317
+    def download_file(self, url):
+        local_filename = str(self.csock.getsockname()) + get_filename(url)
+        # NOTE the stream=True parameter below
+        with requests.get(url, stream=True) as r:
+            r.raise_for_status()
+            with open(local_filename, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192): 
+                    # If you have chunk encoded response uncomment if
+                    # and set chunk_size parameter to None.
+                    #if chunk: 
+                    f.write(chunk)
+        return local_filename
 
     def recv_file(self, file_name, ssSock):
         # receive file through ssSock
